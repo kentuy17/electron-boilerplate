@@ -108,11 +108,8 @@ const createMainWindow = async () => {
 	const window_ = new BrowserWindow({
 		title: app.name,
 		show: false,
-		width: 900,
-		height: 680,
-		webPreferences: {
-			preload: path.join(__dirname, 'preload.js'),
-		},
+		width: 600,
+		height: 400,
 	});
 
 	window_.on('ready-to-show', () => {
@@ -120,6 +117,9 @@ const createMainWindow = async () => {
 	});
 
 	window_.on('closed', () => {
+
+		// Dereference the window
+		// For multiple windows store them in an array
 		mainWindow = undefined;
 	});
 
