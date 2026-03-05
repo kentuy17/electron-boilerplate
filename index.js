@@ -1,41 +1,118 @@
 'use strict';
+
 const path = require('path');
-const {app, BrowserWindow, Menu} = require('electron');
+const fs = require('fs/promises');
+const {app, BrowserWindow, Menu, ipcMain, dialog} = require('electron');
 /// const {autoUpdater} = require('electron-updater');
 const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
-const config = require('./config.js');
+const sqlite3 = require('sqlite3').verbose();
+const xlsx = require('xlsx');
 const menu = require('./menu.js');
 
 unhandled();
 debug();
 contextMenu();
 
-// Note: Must match `build.appId` in package.json
 app.setAppUserModelId('com.company.AppName');
 
-// Uncomment this before publishing your first version.
-// It's commented out as it throws an error if there are no published versions.
-// if (!is.development) {
-// 	const FOUR_HOURS = 1000 * 60 * 60 * 4;
-// 	setInterval(() => {
-// 		autoUpdater.checkForUpdates();
-// 	}, FOUR_HOURS);
-//
-// 	autoUpdater.checkForUpdates();
-// }
-
-// Prevent window from being garbage collected
 let mainWindow;
+let db;
+
+const initDatabase = () => new Promise((resolve, reject) => {
+	const databasePath = path.join(app.getPath('userData'), 'records.sqlite');
+	db = new sqlite3.Database(databasePath, error => {
+		if (error) {
+			reject(error);
+			return;
+		}
+
+		db.run(
+			'CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL)',
+			tableError => {
+				if (tableError) {
+					reject(tableError);
+					return;
+				}
+
+				resolve();
+			},
+		);
+	});
+});
+
+const runQuery = (query, params = []) => new Promise((resolve, reject) => {
+	db.run(query, params, function (error) {
+		if (error) {
+			reject(error);
+			return;
+		}
+
+		resolve({id: this.lastID, changes: this.changes});
+	});
+});
+
+const allQuery = (query, params = []) => new Promise((resolve, reject) => {
+	db.all(query, params, (error, rows) => {
+		if (error) {
+			reject(error);
+			return;
+		}
+
+		resolve(rows);
+	});
+});
+
+ipcMain.handle('records:list', async () => allQuery('SELECT id, name, email FROM records ORDER BY id DESC'));
+
+ipcMain.handle('records:create', async (_event, record) => {
+	const result = await runQuery('INSERT INTO records (name, email) VALUES (?, ?)', [record.name, record.email]);
+	return {id: result.id};
+});
+
+ipcMain.handle('records:update', async (_event, record) => {
+	await runQuery('UPDATE records SET name = ?, email = ? WHERE id = ?', [record.name, record.email, record.id]);
+	return {ok: true};
+});
+
+ipcMain.handle('records:delete', async (_event, id) => {
+	await runQuery('DELETE FROM records WHERE id = ?', [id]);
+	return {ok: true};
+});
+
+ipcMain.handle('records:export', async () => {
+	const rows = await allQuery('SELECT id, name, email FROM records ORDER BY id ASC');
+	const worksheet = xlsx.utils.json_to_sheet(rows);
+	const workbook = xlsx.utils.book_new();
+	xlsx.utils.book_append_sheet(workbook, worksheet, 'Records');
+
+	const defaultPath = path.join(app.getPath('documents'), 'records.xlsx');
+	const {canceled, filePath} = await dialog.showSaveDialog({
+		title: 'Export records to Excel',
+		defaultPath,
+		filters: [{name: 'Excel Workbook', extensions: ['xlsx']}],
+	});
+
+	if (canceled || !filePath) {
+		return {canceled: true};
+	}
+
+	const buffer = xlsx.write(workbook, {type: 'buffer', bookType: 'xlsx'});
+	await fs.writeFile(filePath, buffer);
+	return {canceled: false, filePath};
+});
 
 const createMainWindow = async () => {
 	const window_ = new BrowserWindow({
 		title: app.name,
 		show: false,
-		width: 600,
-		height: 400,
+		width: 900,
+		height: 680,
+		webPreferences: {
+			preload: path.join(__dirname, 'preload.js'),
+		},
 	});
 
 	window_.on('ready-to-show', () => {
@@ -43,17 +120,13 @@ const createMainWindow = async () => {
 	});
 
 	window_.on('closed', () => {
-		// Dereference the window
-		// For multiple windows store them in an array
 		mainWindow = undefined;
 	});
 
 	await window_.loadFile(path.join(__dirname, 'index.html'));
-
 	return window_;
 };
 
-// Prevent multiple instances of the app
 if (!app.requestSingleInstanceLock()) {
 	app.quit();
 }
@@ -80,11 +153,15 @@ app.on('activate', async () => {
 	}
 });
 
+app.on('before-quit', () => {
+	if (db) {
+		db.close();
+	}
+});
+
 (async () => {
 	await app.whenReady();
+	await initDatabase();
 	Menu.setApplicationMenu(menu);
 	mainWindow = await createMainWindow();
-
-	const favoriteAnimal = config.get('favoriteAnimal');
-	mainWindow.webContents.executeJavaScript(`document.querySelector('header p').textContent = 'Your favorite animal is ${favoriteAnimal}'`);
 })();

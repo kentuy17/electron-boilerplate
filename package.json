@@ -25,7 +25,9 @@
 		"electron-store": "^8.1.0",
 		"electron-unhandled": "^4.0.1",
 		"electron-updater": "^5.2.1",
-		"electron-util": "^0.17.2"
+		"electron-util": "^0.17.2",
+		"sqlite3": "^5.1.7",
+		"xlsx": "^0.18.5"
 	},
 	"devDependencies": {
 		"electron": "^13.0.0",
