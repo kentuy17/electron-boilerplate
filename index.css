@@ -34,22 +34,14 @@ header h1 {
 	box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
 }
 
-.record-form {
-	display: grid;
-	gap: 8px;
-	margin-bottom: 16px;
-}
-
-input {
-	padding: 8px;
-	border: 1px solid #cbd2d9;
-	border-radius: 6px;
-}
-
 .button-row {
 	display: flex;
 	gap: 8px;
 	flex-wrap: wrap;
+}
+
+.import-row {
+	margin-bottom: 16px;
 }
 
 button {

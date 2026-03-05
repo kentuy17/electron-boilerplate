@@ -8,33 +8,23 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Electron CRUD + SQLite</h1>
-				<p>Add, edit, delete, and export records to Excel.</p>
+				<h1>Applicant Import + SQLite</h1>
+				<p>Import Excel/CSV files with <code>applicant_name</code> and <code>applicant_code</code>.</p>
 			</header>
 
 			<section class="main">
-				<form id="record-form" class="record-form">
-					<input id="record-id" type="hidden">
-					<label for="name">Name</label>
-					<input id="name" name="name" required placeholder="Jane Doe">
-
-					<label for="email">Email</label>
-					<input id="email" name="email" type="email" required placeholder="jane@example.com">
-
-					<div class="button-row">
-						<button id="submit-btn" type="submit">Add Record</button>
-						<button id="cancel-edit-btn" type="button" hidden>Cancel Edit</button>
-						<button id="export-btn" type="button" class="secondary-btn">Download Excel</button>
-					</div>
-				</form>
+				<div class="button-row import-row">
+					<button id="import-btn" type="button">Import Excel/CSV</button>
+					<button id="export-btn" type="button" class="secondary-btn">Download Excel</button>
+					<button id="template-btn" type="button" class="secondary-btn">Download Template</button>
+				</div>
 
 				<table>
 					<thead>
 						<tr>
 							<th>ID</th>
-							<th>Name</th>
-							<th>Email</th>
-							<th>Actions</th>
+							<th>Applicant Name</th>
+							<th>Applicant Code</th>
 						</tr>
 					</thead>
 					<tbody id="records-body"></tbody>

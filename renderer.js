@@ -1,32 +1,13 @@
 'use strict';
 
-const form = document.querySelector('#record-form');
-const idField = document.querySelector('#record-id');
-const nameField = document.querySelector('#name');
-const emailField = document.querySelector('#email');
-const submitButton = document.querySelector('#submit-btn');
-const cancelEditButton = document.querySelector('#cancel-edit-btn');
+const importButton = document.querySelector('#import-btn');
 const exportButton = document.querySelector('#export-btn');
+const templateButton = document.querySelector('#template-btn');
 const tableBody = document.querySelector('#records-body');
 const statusText = document.querySelector('#status-text');
 
 const setStatus = message => {
 	statusText.textContent = message;
-};
-
-const resetForm = () => {
-	idField.value = '';
-	form.reset();
-	submitButton.textContent = 'Add Record';
-	cancelEditButton.hidden = true;
-};
-
-const fillFormForEdit = record => {
-	idField.value = String(record.id);
-	nameField.value = record.name;
-	emailField.value = record.email;
-	submitButton.textContent = 'Update Record';
-	cancelEditButton.hidden = false;
 };
 
 const renderRecords = records => {
@@ -36,31 +17,9 @@ const renderRecords = records => {
 		const row = document.createElement('tr');
 		row.innerHTML = `
 			<td>${record.id}</td>
-			<td>${record.name}</td>
-			<td>${record.email}</td>
-			<td class="actions-cell"></td>
+			<td>${record.applicant_name}</td>
+			<td>${record.applicant_code}</td>
 		`;
-
-		const actionsCell = row.querySelector('.actions-cell');
-		const editButton = document.createElement('button');
-		editButton.textContent = 'Edit';
-		editButton.className = 'small-btn';
-		editButton.addEventListener('click', () => fillFormForEdit(record));
-
-		const deleteButton = document.createElement('button');
-		deleteButton.textContent = 'Delete';
-		deleteButton.className = 'small-btn danger-btn';
-		deleteButton.addEventListener('click', async () => {
-			await window.api.deleteRecord(record.id);
-			await loadRecords();
-			if (Number(idField.value) === record.id) {
-				resetForm();
-			}
-
-			setStatus(`Deleted record #${record.id}`);
-		});
-
-		actionsCell.append(editButton, deleteButton);
 		tableBody.append(row);
 	}
 };
@@ -70,37 +29,20 @@ const loadRecords = async () => {
 	renderRecords(records);
 };
 
-form.addEventListener('submit', async event => {
-	event.preventDefault();
-
-	const record = {
-		name: nameField.value.trim(),
-		email: emailField.value.trim(),
-	};
-
-	if (!record.name || !record.email) {
-		setStatus('Name and email are required.');
+importButton.addEventListener('click', async () => {
+	const result = await window.api.importApplicants();
+	if (result.canceled) {
+		setStatus('Import canceled.');
 		return;
 	}
 
-	if (idField.value) {
-		await window.api.updateRecord({
-			id: Number(idField.value),
-			...record,
-		});
-		setStatus(`Updated record #${idField.value}`);
-	} else {
-		const created = await window.api.createRecord(record);
-		setStatus(`Created record #${created.id}`);
+	if (!result.ok) {
+		setStatus(result.message);
+		return;
 	}
 
-	resetForm();
 	await loadRecords();
-});
-
-cancelEditButton.addEventListener('click', () => {
-	resetForm();
-	setStatus('Edit canceled.');
+	setStatus(`Imported ${result.insertedCount} applicant record(s).`);
 });
 
 exportButton.addEventListener('click', async () => {
@@ -111,6 +53,16 @@ exportButton.addEventListener('click', async () => {
 	}
 
 	setStatus(`Excel exported to ${result.filePath}`);
+});
+
+templateButton.addEventListener('click', async () => {
+	const result = await window.api.downloadTemplate();
+	if (result.canceled) {
+		setStatus('Template download canceled.');
+		return;
+	}
+
+	setStatus(`Template saved to ${result.filePath}`);
 });
 
 (async () => {
