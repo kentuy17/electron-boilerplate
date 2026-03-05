@@ -2,10 +2,8 @@ html,
 body {
 	padding: 0;
 	margin: 0;
-	background: transparent;
 }
 
-/* Use OS default fonts */
 body {
 	font-family:
 		system-ui,
@@ -14,28 +12,87 @@ body {
 		Roboto,
 		Helvetica,
 		Arial,
-		sans-serif,
-		'Apple Color Emoji',
-		'Segoe UI Emoji';
-	text-rendering: optimizeLegibility;
-	font-feature-settings: 'liga', 'clig', 'kern';
+		sans-serif;
+	background: #f4f6f8;
+	color: #1f2933;
 }
 
-header {
-	position: absolute;
-	width: 500px;
-	height: 250px;
-	top: 50%;
-	left: 50%;
-	margin-top: -125px;
-	margin-left: -250px;
-	text-align: center;
+.container {
+	max-width: 860px;
+	margin: 24px auto;
+	padding: 0 16px;
 }
 
 header h1 {
-	font-size: 60px;
-	font-weight: 200;
-	margin: 0;
-	padding: 0;
-	opacity: 0.7;
+	margin-bottom: 8px;
+}
+
+.main {
+	background: #fff;
+	padding: 16px;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+}
+
+.record-form {
+	display: grid;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+input {
+	padding: 8px;
+	border: 1px solid #cbd2d9;
+	border-radius: 6px;
+}
+
+.button-row {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+button {
+	padding: 8px 12px;
+	border: 0;
+	border-radius: 6px;
+	background: #2563eb;
+	color: #fff;
+	cursor: pointer;
+}
+
+button:hover {
+	filter: brightness(0.95);
+}
+
+.secondary-btn {
+	background: #0f766e;
+}
+
+.small-btn {
+	padding: 6px 10px;
+	font-size: 12px;
+}
+
+.danger-btn {
+	background: #dc2626;
+	margin-left: 8px;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+th,
+td {
+	padding: 10px;
+	border-bottom: 1px solid #e4e7eb;
+	text-align: left;
+}
+
+.status-text {
+	margin: 14px 0 0;
+	min-height: 20px;
+	color: #334e68;
 }
