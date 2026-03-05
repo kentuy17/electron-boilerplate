@@ -43,8 +43,8 @@ const initDatabase = () => new Promise((resolve, reject) => {
 	});
 });
 
-const runQuery = (query, params = []) => new Promise((resolve, reject) => {
-	db.run(query, params, function (error) {
+const runQuery = (query, parameters = []) => new Promise((resolve, reject) => {
+	db.run(query, parameters, function (error) {
 		if (error) {
 			reject(error);
 			return;
@@ -54,8 +54,8 @@ const runQuery = (query, params = []) => new Promise((resolve, reject) => {
 	});
 });
 
-const allQuery = (query, params = []) => new Promise((resolve, reject) => {
-	db.all(query, params, (error, rows) => {
+const allQuery = (query, parameters = []) => new Promise((resolve, reject) => {
+	db.all(query, parameters, (error, rows) => {
 		if (error) {
 			reject(error);
 			return;

@@ -64,6 +64,28 @@ There's also a [Yeoman generator](https://github.com/sindresorhus/generator-elec
 
 Built with [Electron](https://electronjs.org).
 
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) **20 LTS** (recommended for this Electron 13 template)
+- npm 10+
+- Python 3 and build tooling for native modules (`sqlite3`)
+  - macOS: Xcode Command Line Tools (`xcode-select --install`)
+  - Ubuntu/Debian: `sudo apt-get install -y build-essential python3 make g++`
+  - Windows: Visual Studio Build Tools (Desktop development with C++)
+
+### Installation
+
+```sh
+npm install
+```
+
+If native module compilation fails, clean and reinstall dependencies:
+
+```sh
+rm -rf node_modules package-lock.json
+npm install
+```
+
 ### Run
 
 ```sh

@@ -56,6 +56,7 @@ const renderRecords = records => {
 			if (Number(idField.value) === record.id) {
 				resetForm();
 			}
+
 			setStatus(`Deleted record #${record.id}`);
 		});
 
